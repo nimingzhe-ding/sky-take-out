@@ -100,4 +100,20 @@ public class EmployeeController {
         PageResult pageResult =  employeeService.pageQuery(employeePageQueryDTO);
         return  Result.success(pageResult);
     }
+
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     * @return
+     */
+    //查询类的一般都写上泛型（非查询类的一般可以不写）
+    //路径参数需要加上注解
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用禁用员工账号")
+    public Result startOrStop(@PathVariable Integer status,Long  id){
+        log.info("启用禁用员工账号：{}。{}",status,id);
+        employeeService.startOrStop(status,id);
+        return  Result.success();
+    }
 }
