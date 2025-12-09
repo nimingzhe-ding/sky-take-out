@@ -133,4 +133,32 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeMapper.update(employee);
     }
+
+    /**
+     * 根据id查询员工
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employee =  employeeMapper.getById(id);
+        employee.setPassword("****");
+        return employee;
+
+    }
+
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        //需要去进行数据转换，一次是dto，一次是没有dto，需要去进行属性拷贝（如果想直接调用之前的写的动态的update方法的话需要
+        // 这样来去做
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO,employee);
+
+        //修改人和修改时间需要去再进行设置，dto中没有对应的代码
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());//底层能够获取，在拦截器中已经将请求给设置完毕
+
+        employeeMapper.update(employee);
+
+    }
 }
