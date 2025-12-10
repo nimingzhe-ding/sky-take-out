@@ -146,6 +146,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     }
 
+
     @Override
     public void update(EmployeeDTO employeeDTO) {
         //需要去进行数据转换，一次是dto，一次是没有dto，需要去进行属性拷贝（如果想直接调用之前的写的动态的update方法的话需要
@@ -160,4 +161,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.update(employee);
 
     }
+
+
 }
