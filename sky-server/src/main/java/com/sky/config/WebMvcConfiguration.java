@@ -2,6 +2,7 @@ package com.sky.config;
 
 import com.sky.interceptor.JwtTokenAdminInterceptor;
 import com.sky.json.JacksonObjectMapper;
+import com.sky.properties.UploadDir;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -40,7 +41,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenAdminInterceptor)
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/employee/login");
+                .excludePathPatterns("/admin/employee/login")
+                .excludePathPatterns("/admin/employee/logout")
+                .excludePathPatterns("/images/**");
     }
 
     /**
@@ -68,8 +71,16 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      * 设置静态资源映射
      * @param registry
      */
+    @Autowired
+    private UploadDir uploadDir;
+    @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("开始设置静态资源映射");
+        // 1. 先打印出来看看，确保路径拼接是对的
+        String pathPattern = uploadDir.getUploadPath() + "**";
+        String localPath = "file:" + uploadDir.getUploadDir();
+        log.info("映射规则: 访问 [{}] -> 本地路径 [{}]", pathPattern, localPath);
+        registry.addResourceHandler(pathPattern).addResourceLocations(localPath);
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
 
