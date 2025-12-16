@@ -1,5 +1,6 @@
 package com.sky.controller.admin;
 
+import com.sky.constant.MessageConstant;
 import com.sky.properties.UploadDir;
 import com.sky.result.Result;
 import com.sky.utils.AliOssUtil;
@@ -54,6 +55,6 @@ public class CommonController {
                 e.printStackTrace();
             }
 
-            return Result.error("文件");
+            return Result.error(MessageConstant.UPLOAD_FAILED);
         }
 }
