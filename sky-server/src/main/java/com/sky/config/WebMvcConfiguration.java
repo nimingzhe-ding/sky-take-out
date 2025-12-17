@@ -77,10 +77,12 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("开始设置静态资源映射");
         // 1. 先打印出来看看，确保路径拼接是对的
-        String pathPattern = uploadDir.getUploadPath() + "**";
-        String localPath = "file:" + uploadDir.getUploadDir();
-        log.info("映射规则: 访问 [{}] -> 本地路径 [{}]", pathPattern, localPath);
-        registry.addResourceHandler(pathPattern).addResourceLocations(localPath);
+//        String pathPattern = uploadDir.getUploadPath() + "**";
+//        String localPath = "file:" + uploadDir.getUploadDir();
+//        log.info("映射规则: 访问 [{}] -> 本地路径 [{}]", pathPattern, localPath);
+//        registry.addResourceHandler(pathPattern).addResourceLocations(localPath);
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:D:/java_takeaway/images/");
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
 
