@@ -28,15 +28,7 @@ public class DishController {
     @Autowired
     private DishService dishService;
 
-    /**
-     * 根据分类id查询菜品
-     * @param categoryId
-     * @return
-     */
-    public Result<List<Dish>> list(Long categoryId){
-        List<Dish> list = dishService.list(categoryId);
-        return Result.success(list);
-    }
+
     /**
      * 新增菜品
      * @param dishDTO
@@ -74,7 +66,17 @@ public class DishController {
         dishService.deleteBatch(ids);
         return Result.success();
     }
-
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<Dish>> list(Long categoryId){
+        List<Dish> list = dishService.list(categoryId);
+        return Result.success(list);
+    }
     /**
      * 根据id查询菜品
      * @param id
@@ -114,4 +116,5 @@ public class DishController {
         dishService.startOrStop(status,id);
        return Result.success();
     }
+
 }
