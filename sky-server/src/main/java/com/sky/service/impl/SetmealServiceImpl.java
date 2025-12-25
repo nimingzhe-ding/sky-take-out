@@ -14,6 +14,7 @@ import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealOverViewVO;
 import com.sky.vo.SetmealVO;
 import io.swagger.annotations.ApiOperation;
@@ -145,5 +146,26 @@ public class SetmealServiceImpl implements SetmealService {
         }
         Setmeal setmeal = Setmeal.builder().id(id).status(status).build();
         setmealMapper.update(setmeal);
+    }
+/**
+     * 根据条件查询套餐列表
+     * @param setmeal
+     * @return
+     */
+    @Override
+    public List<Setmeal> list(Setmeal setmeal) {
+      List<Setmeal> list =  setmealMapper.list(setmeal);
+      return list;
+
+    }
+
+    /**
+     * 根据id查询套餐中的菜品列表
+     * @param id
+     * @return
+     */
+    @Override
+    public List<DishItemVO> getDishItemById(Long id) {
+        return setmealMapper.getDishItemBySetmealId(id);
     }
 }
