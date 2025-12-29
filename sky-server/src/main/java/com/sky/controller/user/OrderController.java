@@ -61,13 +61,32 @@ public class OrderController {
         PageResult pageResult= orderService.pageQueryUser(page,pageSize,status);
         return Result.success(pageResult);
     }
-    @GetMapping ("orderDetails/{id}")
+    @GetMapping ("/orderDetail/{id}")
     @ApiOperation("订单详情查询")
     public Result<OrderVO> orderDetails(@PathVariable("id") Long id){
         log.info("订单详情查询，订单id：{}",id);
         OrderVO orderVO = orderService.orderDetails(id);
         return Result.success(orderVO);
 }
+
+    /**
+     * 用户取消订单
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("用户取消订单")
+    public Result cancel(@PathVariable("id") Long id)throws Exception{
+        orderService.userCancelById(id);
+        return Result.success();
+    }
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再次下单")
+    public Result repition(@PathVariable Long id){
+        orderService.repetiton(id);
+        return Result.success();
+    }
 
 
 }

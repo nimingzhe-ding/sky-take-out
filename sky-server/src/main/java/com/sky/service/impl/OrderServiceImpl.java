@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -197,5 +199,44 @@ paySuccess(ordersPaymentDTO.getOrderNumber());
         BeanUtils.copyProperties(orders,orderVO);
         orderVO.setOrderDetailList(orderDetailList);
         return orderVO;
+    }
+
+    /**
+     * 用户取消订单
+     * @param id
+     */
+    @Override
+    public void userCancelById(Long id) {
+        Orders orderDB = orderMapper.getById(id);
+        if(orderDB == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if(orderDB.getStatus()>2){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Orders orders = new  Orders();
+        orders.setId(orderDB.getId());
+        if(orderDB.getStatus() == Orders.TO_BE_CONFIRMED){
+            orders.setStatus(Orders.REFUND);
+        }
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelReason("用户取消");
+        orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
+
+    }
+
+    @Override
+    public void repetiton(Long id) {
+        Long userId = BaseContext.getCurrentId();//查询当前用户id
+        List<OrderDetail> orderDetailList = orderDetailMapper.listByOrderId(id);
+        List<ShoppingCart> shoppingCartList = orderDetailList.stream().map(x -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(x, shoppingCart,"id");
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).collect(Collectors.toList());
+    shoppingCartMapper.insertBatch(shoppingCartList);
     }
 }
