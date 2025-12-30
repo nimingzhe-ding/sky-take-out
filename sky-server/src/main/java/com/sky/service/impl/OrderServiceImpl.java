@@ -18,6 +18,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import io.swagger.annotations.ApiOperation;
 import org.apache.poi.hssf.model.InternalWorkbook;
 import org.aspectj.weaver.ast.Or;
@@ -33,7 +34,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,7 +58,8 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper userMapper;
     @Autowired
     private OrderService orderService;
-
+    @Autowired
+    private WebSocketServer webSocketServer;
     /**
      * 用户下单
      *
@@ -146,6 +150,7 @@ public class OrderServiceImpl implements OrderService {
 //        vo.setPackageStr(jsonObject.getString("package"));
         log.info("跳过微信支付，直接返回模拟数据");
         paySuccess(ordersPaymentDTO.getOrderNumber());
+
         return new OrderPaymentVO();
     }
 
@@ -168,6 +173,13 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+        Map map = new HashMap();
+        map.put("type",1);//1表示接单提醒，2表示客户催单
+        map.put("orderId",ordersDB.getId());
+        map.put("content","有新订单待接单，订单号："+outTradeNo);
+        String json = JSONObject.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+
     }
 
     /**
