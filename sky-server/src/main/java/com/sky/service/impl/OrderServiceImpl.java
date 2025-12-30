@@ -83,6 +83,11 @@ private UserMapper userMapper;
         orders.setPayStatus(Orders.UN_PAID);
         orders.setPhone(addressBook.getPhone());
         orders.setConsignee(addressBook.getConsignee());
+        String fullAddress = (addressBook.getProvinceName() == null ? "" : addressBook.getProvinceName())
+                + (addressBook.getCityName() == null ? "" : addressBook.getCityName())
+                + (addressBook.getDistrictName() == null ? "" : addressBook.getDistrictName())
+                + (addressBook.getDetail() == null ? "" : addressBook.getDetail());
+        orders.setAddress(fullAddress);
         orderMapper.insert(orders);
 
         List<OrderDetail> orderDetailList = new ArrayList<>();
