@@ -16,6 +16,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.aspectj.weaver.ast.Or;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -79,8 +81,8 @@ private UserMapper userMapper;
         orders.setOrderTime(LocalDateTime.now());
         orders.setStatus(1);//待付款状态
         orders.setPayStatus(Orders.UN_PAID);
-        orders.setPhone(orders.getPhone());
-        orders.setConsignee(orders.getConsignee());
+        orders.setPhone(addressBook.getPhone());
+        orders.setConsignee(addressBook.getConsignee());
         orderMapper.insert(orders);
 
         List<OrderDetail> orderDetailList = new ArrayList<>();
@@ -238,5 +240,70 @@ paySuccess(ordersPaymentDTO.getOrderNumber());
             return shoppingCart;
         }).collect(Collectors.toList());
     shoppingCartMapper.insertBatch(shoppingCartList);
+    }
+
+    /**
+     * 订单分页查询
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+        //部分订单需要额外返回订单菜品信息，将orders变为ordersVo
+        List<OrderVO> orderVOList = getOrderVOList(page);
+        return new PageResult(page.getTotal(), orderVOList);
+    }
+    private List<OrderVO> getOrderVOList(Page<Orders> page) {
+        //需要返回订单菜品信息，自定义OrderVo的响应结果
+        List<OrderVO> orderVOList = new ArrayList<>();
+        List<Orders> orderList = page.getResult();
+        if(!CollectionUtils.isEmpty(orderList)){
+            for (Orders orders : orderList) {
+                //将共同字段先复制到vo
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+                String orderDishes = getOrderDishesStr(orders);
+
+                orderVO.setOrderDishes(orderDishes);
+                orderVOList.add(orderVO);
+            }
+        }
+        return orderVOList;
+    }
+
+    /**
+     * 展示订单菜品信息拼接字符串
+     * @param orders
+     * @return
+     */
+    private String getOrderDishesStr(Orders orders){
+        List<OrderDetail> orderDetailList = orderDetailMapper.listByOrderId(orders.getId());
+        //将每个菜品变成字符串
+        List<String> orderDishesList = orderDetailList.stream().map(x->{
+            String orderDish = x.getName()+'*'+x.getNumber()+';';
+            return orderDish;
+        }).collect(Collectors.toList());
+//将订单所有菜品拼接在一起
+        return String.join("",orderDishesList);
+    }
+
+    /**
+     * 订单统计
+     * @return
+     */
+    @Override
+    public OrderStatisticsVO statistics() {
+        Integer toBeConfirmed= orderMapper.countStatus(Orders.TO_BE_CONFIRMED);
+        Integer confirmed = orderMapper.countStatus(Orders.CONFIRMED);
+        Integer deliveryInProgress = orderMapper.countStatus(Orders.DELIVERY_IN_PROGRESS);
+
+        //将查询到的数据封装到VO中响应
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmed);
+        orderStatisticsVO.setConfirmed(confirmed);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgress);
+        return orderStatisticsVO;
     }
 }
