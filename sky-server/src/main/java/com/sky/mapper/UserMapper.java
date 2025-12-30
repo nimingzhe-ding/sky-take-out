@@ -14,11 +14,18 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface UserMapper {
+    /**
+     * 根据动态条件查询
+     * @param map
+     * @return
+     */
+     Integer countByMap(Map map);
 
-      /**
+    /**
        * 根据openid查询用户
        * @param openId
        * @return
